@@ -1,0 +1,212 @@
+<?xml version="1.0" ?>
+<sdf version="1.4">
+  
+  <world name="default">
+   
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+    
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    
+	<model name="pan_tilt_camera">
+	  <pose>0 0 5 0 0 0</pose>
+	  <link name="base">
+	    <!-- Offset the base by half the length of the cylinder -->
+	    <pose>0 0 0.029335 0 0 0</pose>
+	    <inertial>
+	      <mass>1.2</mass>
+	      <inertia>
+			<ixx>0.001087473</ixx>
+			<iyy>0.001087473</iyy>
+			<izz>0.001092437</izz>
+			<ixy>0</ixy>
+			<ixz>0</ixz>
+			<iyz>0</iyz>
+	      </inertia>
+	    </inertial>
+	    <collision name="base_collision">
+	      <geometry>
+		<cylinder>
+		  <!-- Radius and length provided by Velodyne -->
+		  <radius>.04267</radius>
+		  <length>.05867</length>
+		</cylinder>
+	      </geometry>
+	    </collision>
+	    <!-- The visual is mostly a copy of the collision -->
+	    <visual name="base_visual">
+	      <geometry>
+		<cylinder>
+		  <radius>.04267</radius>
+		  <length>.05867</length>
+		</cylinder>
+	      </geometry>
+	    </visual>
+	  </link>
+
+	  <!-- Give the base link a unique name -->
+	  <link name="top">
+	    <!-- Vertically offset the top cylinder by the length of the bottom
+		cylinder and half the length of this cylinder. -->
+	    <pose>0 0 -0.036785 0 0 0</pose>
+		   <inertial>
+		     <mass>0.1</mass>
+		     <inertia>
+		       <ixx>0.000090623</ixx>
+		       <iyy>0.000090623</iyy>
+		       <izz>0.000091036</izz>
+		       <ixy>0</ixy>
+		       <ixz>0</ixz>
+		       <iyz>0</iyz>
+		     </inertia>
+		   </inertial>
+	    <collision name="top_collision">
+	      <geometry>
+		<cylinder>
+		  <!-- Radius and length provided by Velodyne -->
+		  <radius>0.04267</radius>
+		  <length>0.07357</length>
+		</cylinder>
+	      </geometry>
+	    </collision>
+	    <!-- The visual is mostly a copy of the collision -->
+	    <visual name="top_visual">
+	      <geometry>
+		<cylinder>
+		  <radius>0.04267</radius>
+		  <length>0.07357</length>
+		</cylinder>
+	      </geometry>
+	    </visual>
+	  </link>
+
+	  <link name="ball">
+		  <pose>0 0 -0.07357 0 0 0</pose>
+		  <sensor type="camera" name="camera1">
+			<update_rate>30.0</update_rate>
+		      <camera name="head">
+				<horizontal_fov>0.698132</horizontal_fov>
+				<image>
+				  <width>800</width>
+				  <height>800</height>
+				  <format>R8G8B8</format>
+				</image>
+				<clip>
+				  <near>0.02</near>
+				  <far>300</far>
+				</clip>
+				<noise>
+				  <type>gaussian</type>
+				  <!-- Noise is sampled independently per pixel on each frame.  
+				       That pixel's noise value is added to each of its color
+				       channels, which at that point lie in the range [0,1]. -->
+				  <mean>0.0</mean>
+				  <stddev>0.007</stddev>
+				</noise>
+		      </camera>
+			  <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+				<alwaysOn>true</alwaysOn>
+				<updateRate>0.0</updateRate>
+				<cameraName>gimbal/camera1</cameraName>
+				<imageTopicName>image_raw</imageTopicName>
+				<cameraInfoTopicName>camera_info</cameraInfoTopicName>
+				<frameName>camera_link</frameName>
+				<hackBaseline>0.07</hackBaseline>
+				<distortionK1>0.0</distortionK1>
+				<distortionK2>0.0</distortionK2>
+				<distortionK3>0.0</distortionK3>
+				<distortionT1>0.0</distortionT1>
+				<distortionT2>0.0</distortionT2>
+			   </plugin>
+			   <visualize>true</visualize>
+		  </sensor>
+		   <inertial>
+		     <mass>0.1</mass>
+		     <inertia>
+		       <ixx>0.000090623</ixx>
+		       <iyy>0.000090623</iyy>
+		       <izz>0.000091036</izz>
+		       <ixy>0</ixy>
+		       <ixz>0</ixz>
+		       <iyz>0</iyz>
+		     </inertia>
+		   </inertial>
+	    <collision name="ball_collision">
+	      <geometry>
+		<sphere>
+		  <radius>0.04267</radius>
+		</sphere>
+	      </geometry>
+	    </collision>
+	    <!-- The visual is mostly a copy of the collision -->
+	    <visual name="ball_visual">
+	      <geometry>
+		<sphere>
+		  <radius>0.04267</radius>
+		</sphere>
+	      </geometry>
+	    </visual>
+	  </link>
+
+	<!-- Each joint must have a unique name -->
+
+	<joint type="revolute" name="joint">
+	  <!-- Position the joint at the bottom of the top link -->
+	  <pose>0 0 -0.036785 0 0 0</pose>
+	  <!-- Use the base link as the parent of the joint -->
+	  <parent>base</parent>
+	  <!-- Use the top link as the child of the joint -->
+	  <child>top</child>
+	  <!-- The axis defines the joint's degree of freedom -->
+	  <axis>
+	    <!-- Revolve around the z-axis -->
+	    <xyz>0 0 1</xyz>
+	    <!-- Limit refers to the range of motion of the joint -->
+	    <limit>
+	      <!-- Use a very large number to indicate a continuous revolution -->
+	      <lower>-10000000000000000</lower>
+	      <upper>10000000000000000</upper>
+	    </limit>
+	  </axis>
+	</joint>
+
+	<joint type="revolute" name="ball_joint">
+	  <!-- Position the joint at the bottom of the top link -->
+	  <pose>0 0 0 0 0 0</pose>
+	  <!-- Use the base link as the parent of the joint -->
+	  <parent>top</parent>
+	  <!-- Use the top link as the child of the joint -->
+	  <child>ball</child>
+	  <!-- The axis defines the joint's degree of freedom -->
+	  <axis>
+	    <!-- Revolve around the y-axis -->
+	    <xyz>0 1 0</xyz>
+	    <!-- Limit refers to the range of motion of the joint -->
+	    <limit>
+	      <!-- Use a very large number to indicate a continuous revolution -->
+	      <lower>-10000000000000000</lower>
+	      <upper>10000000000000000</upper>
+	    </limit>
+	  </axis>
+	</joint>
+
+	<joint name="fixed to ground" type="revolute">
+	  <parent>world</parent>
+	  <child>base</child>
+	  <axis>
+        <limit>
+          <lower>0</lower>
+          <upper>0</upper>
+        </limit>
+        <xyz>0 0 1</xyz>
+        </axis>
+	</joint>
+      <!-- Attach the plugin to this model -->
+    <plugin name="gimbal_control" filename="libgimbal_gazebo.so"/>
+	</model>
+  </world>
+</sdf>

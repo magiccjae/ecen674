@@ -1,0 +1,11 @@
+<launch>
+  <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
+  <node pkg="joy" type="joy_node" name="joy" />
+  <node pkg="teleop_twist_joy" type="teleop_node" name="teleop" />
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find gimbal_gazebo)/worlds/gimbal.world"/>
+    <!-- more default parameters can be changed here -->
+    <arg name="paused" value="true"/>
+  </include>
+
+</launch>
